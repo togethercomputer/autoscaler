@@ -257,7 +257,8 @@ func podsToEvict(nodeInfo *framework.NodeInfo, evictDsByDefault bool) (dsPods, n
 	for _, podInfo := range nodeInfo.Pods {
 		if pod_util.IsMirrorPod(podInfo.Pod) {
 			continue
-		} else if pod_util.IsDaemonSetPod(podInfo.Pod) {
+		} else if pod_util.IsDaemonSetPod(podInfo.Pod) || pod_util.IsWekaClientPod(podInfo.Pod) {
+			// Weka client pods are treated like DaemonSet pods for eviction purposes
 			dsPods = append(dsPods, podInfo.Pod)
 		} else {
 			nonDsPods = append(nonDsPods, podInfo.Pod)
