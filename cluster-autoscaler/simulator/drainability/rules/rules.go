@@ -31,6 +31,7 @@ import (
 	"k8s.io/autoscaler/cluster-autoscaler/simulator/drainability/rules/safetoevict"
 	"k8s.io/autoscaler/cluster-autoscaler/simulator/drainability/rules/system"
 	"k8s.io/autoscaler/cluster-autoscaler/simulator/drainability/rules/terminal"
+	"k8s.io/autoscaler/cluster-autoscaler/simulator/drainability/rules/wekaclient"
 	"k8s.io/autoscaler/cluster-autoscaler/simulator/options"
 	"k8s.io/klog/v2"
 )
@@ -59,6 +60,7 @@ func Default(deleteOptions options.NodeDeleteOptions) Rules {
 
 		// Interrupting checks
 		{rule: daemonset.New()},
+		{rule: wekaclient.New()},
 		{rule: safetoevict.New()},
 		{rule: terminal.New()},
 

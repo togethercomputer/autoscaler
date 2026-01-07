@@ -26,6 +26,15 @@ import (
 const (
 	// DaemonSetPodAnnotationKey - annotation use to informs the cluster-autoscaler controller when a pod needs to be considered as a Daemonset's Pod.
 	DaemonSetPodAnnotationKey = "cluster-autoscaler.kubernetes.io/daemonset-pod"
+
+	// WekaClientPodLabelAppName is the label key for identifying Weka client pods by app name.
+	WekaClientPodLabelAppName = "app.kubernetes.io/name"
+	// WekaClientPodLabelAppNameValue is the expected value for the app name label.
+	WekaClientPodLabelAppNameValue = "WekaContainer"
+	// WekaClientPodLabelMode is the label key for identifying Weka client pods by mode.
+	WekaClientPodLabelMode = "weka.io/mode"
+	// WekaClientPodLabelModeValue is the expected value for the mode label.
+	WekaClientPodLabelModeValue = "client"
 )
 
 // IsDaemonSetPod returns true if the Pod should be considered as Pod managed by a DaemonSet
@@ -36,6 +45,19 @@ func IsDaemonSetPod(pod *apiv1.Pod) bool {
 	}
 
 	return pod.Annotations[DaemonSetPodAnnotationKey] == "true"
+}
+
+// IsWekaClientPod returns true if the Pod should be considered as a Weka client pod.
+// Weka client pods are identified by having both labels:
+// - app.kubernetes.io/name=WekaContainer
+// - weka.io/mode=client
+// These pods behave like DaemonSet pods and should not block node removal.
+func IsWekaClientPod(pod *apiv1.Pod) bool {
+	if pod.Labels == nil {
+		return false
+	}
+	return pod.Labels[WekaClientPodLabelAppName] == WekaClientPodLabelAppNameValue &&
+		pod.Labels[WekaClientPodLabelMode] == WekaClientPodLabelModeValue
 }
 
 // IsMirrorPod checks whether the pod is a mirror pod.
@@ -61,7 +83,7 @@ func IsStaticPod(pod *apiv1.Pod) bool {
 func FilterRecreatablePods(pods []*apiv1.Pod) []*apiv1.Pod {
 	filtered := make([]*apiv1.Pod, 0, len(pods))
 	for _, p := range pods {
-		if IsStaticPod(p) || IsMirrorPod(p) || IsDaemonSetPod(p) {
+		if IsStaticPod(p) || IsMirrorPod(p) || IsDaemonSetPod(p) || IsWekaClientPod(p) {
 			continue
 		}
 		filtered = append(filtered, p)

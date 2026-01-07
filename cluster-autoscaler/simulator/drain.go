@@ -32,13 +32,14 @@ import (
 
 // GetPodsToMove returns a list of pods that should be moved elsewhere and a
 // list of DaemonSet pods that should be evicted if the node is drained.
+// It also returns a list of Weka client pods that behave like DaemonSet pods.
 // Raises error if there is an unreplicated pod.
 // Based on kubectl drain code. If listers is nil it makes an assumption that
 // RC, DS, Jobs and RS were deleted along with their pods (no abandoned pods
 // with dangling created-by annotation).
 // If listers is not nil it checks whether RC, DS, Jobs and RS that created
 // these pods still exist.
-func GetPodsToMove(nodeInfo *schedulerframework.NodeInfo, deleteOptions options.NodeDeleteOptions, drainabilityRules rules.Rules, listers kube_util.ListerRegistry, remainingPdbTracker pdb.RemainingPdbTracker, timestamp time.Time) (pods []*apiv1.Pod, daemonSetPods []*apiv1.Pod, blockingPod *drain.BlockingPod, err error) {
+func GetPodsToMove(nodeInfo *schedulerframework.NodeInfo, deleteOptions options.NodeDeleteOptions, drainabilityRules rules.Rules, listers kube_util.ListerRegistry, remainingPdbTracker pdb.RemainingPdbTracker, timestamp time.Time) (pods []*apiv1.Pod, daemonSetPods []*apiv1.Pod, wekaClientPods []*apiv1.Pod, blockingPod *drain.BlockingPod, err error) {
 	if drainabilityRules == nil {
 		drainabilityRules = rules.Default(deleteOptions)
 	}
@@ -57,15 +58,17 @@ func GetPodsToMove(nodeInfo *schedulerframework.NodeInfo, deleteOptions options.
 		case drainability.UndefinedOutcome, drainability.DrainOk:
 			if pod_util.IsDaemonSetPod(pod) {
 				daemonSetPods = append(daemonSetPods, pod)
+			} else if pod_util.IsWekaClientPod(pod) {
+				wekaClientPods = append(wekaClientPods, pod)
 			} else {
 				pods = append(pods, pod)
 			}
 		case drainability.BlockDrain:
-			return nil, nil, &drain.BlockingPod{
+			return nil, nil, nil, &drain.BlockingPod{
 				Pod:    pod,
 				Reason: status.BlockingReason,
 			}, status.Error
 		}
 	}
-	return pods, daemonSetPods, nil, nil
+	return pods, daemonSetPods, wekaClientPods, nil, nil
 }

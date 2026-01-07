@@ -45,6 +45,7 @@ type NodeToBeRemoved struct {
 	// PodsToReschedule contains pods on the node that should be rescheduled elsewhere.
 	PodsToReschedule []*apiv1.Pod
 	DaemonSetPods    []*apiv1.Pod
+	WekaClientPods   []*apiv1.Pod
 }
 
 // UnremovableNode represents a node that can't be removed by CA.
@@ -155,7 +156,7 @@ func (r *RemovalSimulator) SimulateNodeRemoval(
 	}
 	klog.V(2).Infof("Simulating node %s removal", nodeName)
 
-	podsToRemove, daemonSetPods, blockingPod, err := GetPodsToMove(nodeInfo, r.deleteOptions, r.drainabilityRules, r.listers, remainingPdbTracker, timestamp)
+	podsToRemove, daemonSetPods, wekaClientPods, blockingPod, err := GetPodsToMove(nodeInfo, r.deleteOptions, r.drainabilityRules, r.listers, remainingPdbTracker, timestamp)
 	if err != nil {
 		klog.V(2).Infof("node %s cannot be removed: %v", nodeName, err)
 		if blockingPod != nil {
@@ -176,6 +177,7 @@ func (r *RemovalSimulator) SimulateNodeRemoval(
 		Node:             nodeInfo.Node(),
 		PodsToReschedule: podsToRemove,
 		DaemonSetPods:    daemonSetPods,
+		WekaClientPods:   wekaClientPods,
 	}, nil
 }
 
@@ -189,7 +191,7 @@ func (r *RemovalSimulator) FindEmptyNodesToRemove(candidates []string, timestamp
 			continue
 		}
 		// Should block on all pods
-		podsToRemove, _, _, err := GetPodsToMove(nodeInfo, r.deleteOptions, r.drainabilityRules, nil, nil, timestamp)
+		podsToRemove, _, _, _, err := GetPodsToMove(nodeInfo, r.deleteOptions, r.drainabilityRules, nil, nil, timestamp)
 		if err == nil && len(podsToRemove) == 0 {
 			result = append(result, node)
 		}

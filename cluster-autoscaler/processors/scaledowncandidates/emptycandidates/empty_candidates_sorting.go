@@ -73,7 +73,7 @@ func (p *EmptySorting) isNodeEmpty(node *apiv1.Node) bool {
 	if err != nil {
 		return false
 	}
-	podsToRemove, _, _, err := simulator.GetPodsToMove(nodeInfo, p.deleteOptions, p.drainabilityRules, nil, nil, time.Now())
+	podsToRemove, _, _, _, err := simulator.GetPodsToMove(nodeInfo, p.deleteOptions, p.drainabilityRules, nil, nil, time.Now())
 	if err == nil && len(podsToRemove) == 0 {
 		return true
 	}

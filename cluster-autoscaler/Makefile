@@ -110,6 +110,35 @@ test-in-docker: clean docker-builder
 
 .PHONY: all build test-unit clean format execute-release dev-release docker-builder build-in-docker release generate push-image push-manifest
 
+##@ ECR Build and Push
+
+# ECR configuration
+ECR_REGISTRY ?= public.ecr.aws/k6t4m3l7
+IMG_TAG_VERSION ?= latest
+IMG ?= $(ECR_REGISTRY)/autoscaler:$(IMG_TAG_VERSION)
+CONTAINER_TOOL ?= docker
+
+.PHONY: docker-build
+docker-build: build-arch-amd64 ## Build docker image for ECR with the cluster-autoscaler.
+	$(CONTAINER_TOOL) build \
+		-t ${IMG} \
+		--platform linux/amd64 \
+		-f Dockerfile.amd64 .
+	@echo "Built image: ${IMG}"
+
+.PHONY: docker-push
+docker-push: ## Push docker image to ECR.
+	$(CONTAINER_TOOL) push ${IMG}
+	@echo "Pushed image: ${IMG}"
+
+.PHONY: docker-build-push
+docker-build-push: docker-build docker-push ## Build and push docker image to ECR.
+	@echo "Build and push completed for: ${IMG}"
+
+.PHONY: ecr-login
+ecr-login: ## Login to ECR (requires AWS CLI configured).
+	aws ecr-public get-login-password --region us-east-1 | $(CONTAINER_TOOL) login --username AWS --password-stdin public.ecr.aws
+
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
