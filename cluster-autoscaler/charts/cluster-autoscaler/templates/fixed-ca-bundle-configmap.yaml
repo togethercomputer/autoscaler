@@ -1,0 +1,12 @@
+{{- if .Values.fixedCABundle.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "cluster-autoscaler.fullname" . }}-fixed-ca-bundle
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "cluster-autoscaler.labels" . | indent 4 }}
+data:
+  ca-certificates.crt: |-
+{{ .Files.Get "files/ca-certificates.crt" | indent 4 }}
+{{- end }}

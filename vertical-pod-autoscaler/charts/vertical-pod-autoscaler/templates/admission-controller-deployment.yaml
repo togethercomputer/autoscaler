@@ -101,6 +101,9 @@ spec:
             failureThreshold: 3
           volumeMounts:
             {{- toYaml .Values.admissionController.volumeMounts | nindent 12 }}
+            {{- if .Values.fixedCABundle.enabled }}
+            {{- include "vertical-pod-autoscaler.fixedCABundle.volumeMount" . | nindent 12 }}
+            {{- end }}
           {{- with .Values.admissionController.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -111,4 +114,7 @@ spec:
           {{- end }}
       volumes:
         {{- toYaml .Values.admissionController.volumes | nindent 8 }}
+        {{- if .Values.fixedCABundle.enabled }}
+        {{- include "vertical-pod-autoscaler.fixedCABundle.volume" . | nindent 8 }}
+        {{- end }}
 {{- end -}}

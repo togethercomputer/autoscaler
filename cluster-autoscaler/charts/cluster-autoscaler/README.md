@@ -476,6 +476,7 @@ vpa:
 | extraVolumeMounts | list | `[]` | Additional volumes to mount. |
 | extraVolumeSecrets | object | `{}` | Additional volumes to mount from Secrets. |
 | extraVolumes | list | `[]` | Additional volumes. |
+| fixedCABundle.enabled | bool | `true` | Mount a fixed CA bundle (files/ca-certificates.crt, Alpine 3.23 ca-certificates 20261020-r0) over the image's /etc/ssl/certs/ca-certificates.crt (CVE-2026-111943). |
 | fullnameOverride | string | `""` | String to fully override `cluster-autoscaler.fullname` template. |
 | hostNetwork | bool | `false` | Whether to expose network interfaces of the host machine to pods. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |

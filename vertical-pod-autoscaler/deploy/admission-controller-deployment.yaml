@@ -32,6 +32,10 @@ spec:
             - name: tls-certs
               mountPath: "/etc/tls-certs"
               readOnly: true
+            - name: fixed-ca-bundle
+              mountPath: /etc/ssl/certs/ca-certificates.crt
+              subPath: ca-certificates.crt
+              readOnly: true
           resources:
             limits:
               cpu: 200m
@@ -62,3 +66,6 @@ spec:
         - name: tls-certs
           secret:
             secretName: vpa-tls-certs
+        - name: fixed-ca-bundle
+          configMap:
+            name: vpa-fixed-ca-bundle
