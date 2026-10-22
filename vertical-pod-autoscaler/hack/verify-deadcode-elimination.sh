@@ -36,7 +36,14 @@ WHYDEADCODE_BIN="$(which whydeadcode)"
 for binary in "${COMPONENTS[@]}"; do
   echo "Processing ${binary} ..."
   pushd "pkg/${binary}"
-  output=$(GOLDFLAGS=-dumpdep go build -ldflags=-dumpdep -o "${binary}" 2>&1 | grep "\->" | ${WHYDEADCODE_BIN} 2>&1)
+  # Go 1.26 added the reflect.Type.Methods / reflect.Value.Methods iterators,
+  # whose closures carry the linker's ReflectMethod attribute. With Go >= 1.26
+  # they are reported for every binary here (also on unmodified upstream code),
+  # together with the promoted reflect.Value methods of kube-openapi's
+  # go-json-experiment addressableValue (which embeds reflect.Value).
+  # Ignore traces rooted in those toolchain/dependency symbols only.
+  output=$(GOLDFLAGS=-dumpdep go build -ldflags=-dumpdep -o "${binary}" 2>&1 | grep "\->" | ${WHYDEADCODE_BIN} 2>&1 \
+    | awk 'BEGIN { RS = ""; ORS = "\n\n" } $1 !~ /\.Methods\.func1$/ && $1 !~ /go-json-experiment\/json\.\(?\*?addressableValue\)?\.Method(ByName)?$/')
   if [[ -n "$output" ]]; then
     echo "golang linker is not eliminating dead code in ${binary}, please check the trace output below:"
     echo "(NOTE: that there may be false positives, but the first trace should be a real issue)"
