@@ -15,6 +15,10 @@ spec:
         app: vpa-recommender
     spec:
       serviceAccountName: vpa-recommender
+      volumes:
+        - name: fixed-ca-bundle
+          configMap:
+            name: vpa-fixed-ca-bundle
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534 # nobody
@@ -22,6 +26,11 @@ spec:
       - name: recommender
         image: registry.k8s.io/autoscaling/vpa-recommender:1.5.1
         imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: fixed-ca-bundle
+          mountPath: /etc/ssl/certs/ca-certificates.crt
+          subPath: ca-certificates.crt
+          readOnly: true
         resources:
           limits:
             cpu: 200m
