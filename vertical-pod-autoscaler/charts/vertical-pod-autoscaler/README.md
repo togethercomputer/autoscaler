@@ -4,7 +4,7 @@ WARNING: This chart is currently under development and is not ready for producti
 
 Automatically adjust resources for your workloads
 
-![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square)
+![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 ![AppVersion: 1.5.1](https://img.shields.io/badge/AppVersion-1.5.1-informational?style=flat-square)
 
@@ -141,6 +141,7 @@ helm upgrade <release-name> <chart> \
 | admissionController.volumes[0].secret.secretName | string | `"vpa-tls-certs"` |  |
 | commonLabels | object | `{}` |  |
 | containerSecurityContext | object | `{}` |  |
+| fixedCABundle.enabled | bool | `true` | Mount a fixed CA bundle (files/ca-certificates.crt, Alpine 3.23 ca-certificates 20261020-r0) over the images' /etc/ssl/certs/ca-certificates.crt (CVE-2026-111943). |
 | fullnameOverride | string | `nil` |  |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `nil` |  |

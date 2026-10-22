@@ -19,6 +19,10 @@ spec:
     spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ include "vertical-pod-autoscaler.admissionController.certGen.fullname" . }}
+      {{- if .Values.fixedCABundle.enabled }}
+      volumes:
+        {{- include "vertical-pod-autoscaler.fixedCABundle.volume" . | nindent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -30,6 +34,10 @@ spec:
         - name: patch
           image: {{ printf "%s:%s" .Values.admissionController.certGen.image.repository .Values.admissionController.certGen.image.tag }}
           imagePullPolicy: {{ .Values.admissionController.certGen.image.pullPolicy }}
+          {{- if .Values.fixedCABundle.enabled }}
+          volumeMounts:
+            {{- include "vertical-pod-autoscaler.fixedCABundle.volumeMount" . | nindent 12 }}
+          {{- end }}
           args:
             - patch
             - --webhook-name={{ include "vertical-pod-autoscaler.admissionController.webhook.configName" . }}

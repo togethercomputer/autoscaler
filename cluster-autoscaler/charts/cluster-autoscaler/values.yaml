@@ -274,6 +274,10 @@ extraVolumes: []
   #   hostPath:
   #     path: /etc/ssl/certs/ca-bundle.crt
 
+# fixedCABundle.enabled -- Mount a fixed CA bundle (files/ca-certificates.crt, Alpine 3.23 ca-certificates 20261020-r0) over the image's /etc/ssl/certs/ca-certificates.crt (CVE-2026-111943).
+fixedCABundle:
+  enabled: true
+
 # extraVolumeSecrets -- Additional volumes to mount from Secrets.
 extraVolumeSecrets: {}
   # autoscaler-vol:

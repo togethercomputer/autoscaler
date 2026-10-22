@@ -20,6 +20,10 @@ podSecurityContext:
 
 containerSecurityContext: {}
 
+# fixedCABundle.enabled -- Mount a fixed CA bundle (files/ca-certificates.crt, Alpine 3.23 ca-certificates 20261020-r0) over the images' /etc/ssl/certs/ca-certificates.crt (CVE-2026-111943).
+fixedCABundle:
+  enabled: true
+
 admissionController:
   enabled: true
   image:

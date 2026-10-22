@@ -156,3 +156,19 @@ app.kubernetes.io/component: recommender
 {{- define "vertical-pod-autoscaler.recommender.image" -}}
 {{- printf "%s:%s" .Values.recommender.image.repository (default .Chart.AppVersion .Values.recommender.image.tag) }}
 {{- end }}
+
+{{/*
+fixedCABundle
+*/}}
+{{- define "vertical-pod-autoscaler.fixedCABundle.volumeMount" -}}
+- name: fixed-ca-bundle
+  mountPath: /etc/ssl/certs/ca-certificates.crt
+  subPath: ca-certificates.crt
+  readOnly: true
+{{- end }}
+
+{{- define "vertical-pod-autoscaler.fixedCABundle.volume" -}}
+- name: fixed-ca-bundle
+  configMap:
+    name: {{ include "vertical-pod-autoscaler.fullname" . }}-fixed-ca-bundle
+{{- end }}
